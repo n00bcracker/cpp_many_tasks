@@ -1,6 +1,6 @@
-project(shad-cpp0)
+cmake_minimum_required(VERSION 3.14)
 
-cmake_minimum_required(VERSION 3.8)
+project(shad-cpp0)
 
 set(CMAKE_CXX_STANDARD             20)
 set(CMAKE_MODULE_PATH              "${CMAKE_SOURCE_DIR}/tools/cmake")
@@ -11,6 +11,10 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS  ON)
 find_package(Catch REQUIRED)
 find_package(PNG)
 find_package(JPEG)
+
+set(Clang_DIR "/usr/lib/llvm-16/lib/cmake/clang")
+set(LLVM_DIR "/usr/lib/llvm-16/lib/cmake/llvm")
+find_package(Clang CONFIG)
 
 find_package(Poco QUIET COMPONENTS Foundation Net JSON)
 if (NOT Poco_FOUND)

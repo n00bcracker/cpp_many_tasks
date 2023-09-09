@@ -168,10 +168,10 @@ def colorize(diff_lines):
         return '\x1b[36m' + s + '\x1b[0m'
 
     def green(s):
-        return '\x1b[32m' + s + '\x1b[0m'
+        return '\x1b[32m\x1b[7m' + s + '\x1b[0m'
 
     def red(s):
-        return '\x1b[31m' + s + '\x1b[0m'
+        return '\x1b[31m\x1b[7m' + s + '\x1b[0m'
 
     for line in diff_lines:
         if line[:4] in ['--- ', '+++ ']:
@@ -179,9 +179,9 @@ def colorize(diff_lines):
         elif line.startswith('@@ '):
             yield cyan(line)
         elif line.startswith('+'):
-            yield green(line)
+            yield green(line.replace('\t', '→'))
         elif line.startswith('-'):
-            yield red(line)
+            yield red(line.replace('\t', '→'))
         else:
             yield line
 
