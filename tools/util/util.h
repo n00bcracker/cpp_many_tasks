@@ -8,7 +8,7 @@
 
 class RandomGenerator {
 public:
-    explicit RandomGenerator(uint32_t seed = 738547485u) : gen_{seed} {
+    explicit RandomGenerator(uint32_t seed = 738'547'485u) : gen_{seed} {
     }
 
     template <class T>
