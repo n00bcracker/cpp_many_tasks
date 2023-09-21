@@ -22,7 +22,7 @@ $ sudo apt-get install g++-12
 ```bash
 $ wget https://apt.llvm.org/llvm.sh
 $ chmod +x llvm.sh
-$ sudo ./llvm.sh 16
+$ sudo ./llvm.sh 16 all
 ```
 
 ## Регистрация в системе
@@ -84,3 +84,16 @@ $ git push origin master
 4. Пронаблюдайте за процессом тестирования на странице CI/CD -> Pipelines своего репозитория. gitlab показывает вывод консоли во время тестирования.
 
 5. Проверьте, что оценка появилась в [таблице с результатами]
+
+## Установка и запуск линтера
+
+```bash
+$ wget https://apt.llvm.org/llvm.sh
+$ chmod +x llvm.sh
+$ sudo ./llvm.sh 16 all
+```
+
+```bash
+# Находясь в build директории
+../run_linter.sh <имя задачи>
+```

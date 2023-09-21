@@ -8,11 +8,11 @@ if [ "$#" -lt 1 ]; then
 fi
 
 TASK_PATH=../$1
-CLANG_PATH=../run-clang-format.py
 
 if [ ! -f compile_commands.json ]; then
     echo "Run this script from the build directory"
     exit 1
 fi
 
-$CLANG_PATH -r $TASK_PATH && clang-tidy $TASK_PATH/*.cpp
+../run-clang-format.py --clang-format-executable clang-format-16 -r $TASK_PATH
+find $TASK_PATH -name *.cpp | xargs clang-tidy-16 -p .
