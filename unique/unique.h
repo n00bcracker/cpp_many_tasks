@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <stdexcept>
+#include <cstdlib>
 
 std::vector<int> Unique(const std::vector<int>& data) {
     std::vector<int> res;
