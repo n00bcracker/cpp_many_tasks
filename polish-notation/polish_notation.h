@@ -42,17 +42,17 @@ int EvaluateExpression(const std::string& expression) {
 
             int res;
             switch (p[0]) {
-            case '+':
-                res = arg1 + arg2;
-                break;
-            case '-':
-                res = arg1 - arg2;
-                break;;
-            case '*':
-                res = arg1 * arg2;
-                break;
-            default:
-                break;
+                case '+':
+                    res = arg1 + arg2;
+                    break;
+                case '-':
+                    res = arg1 - arg2;
+                    break;;
+                case '*':
+                    res = arg1 * arg2;
+                    break;
+                default:
+                    break;
             }
 
             numbers.push(res);
