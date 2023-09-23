@@ -48,7 +48,7 @@ int EvaluateExpression(const std::string& expression) {
                     break;
                 case '-':
                     res = arg1 - arg2;
-                    break;;
+                    break;
                 case '*':
                     res = arg1 * arg2;
                     break;
