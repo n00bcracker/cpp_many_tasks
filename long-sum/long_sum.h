@@ -2,12 +2,15 @@
 
 #include <string>
 #include <stdexcept>
+#include <algorithm>
 
-std::string LongSumRef(std::reference_wrapper<const std::string> sr1, std::reference_wrapper<const std::string> sr2) {
+std::string LongSumRef(std::reference_wrapper<const std::string> sr1,
+                       std::reference_wrapper<const std::string> sr2) {
     if (sr1.get().size() < sr2.get().size()) {
         std::swap(sr1, sr2);
     }
-    const std::string& s1 = sr1.get(), s2 = sr2.get();
+    const std::string& s1 = sr1.get();
+    const std::string& s2 = sr2.get();
     std::string res;
 
     size_t ls1 = s1.size(), ls2 = s2.size();
@@ -30,6 +33,5 @@ std::string LongSumRef(std::reference_wrapper<const std::string> sr1, std::refer
 }
 
 std::string LongSum(const std::string& a, const std::string& b) {
-    // size_t max_len = std::max(a.size(), b.size());
     return LongSumRef(a, b);
 }
