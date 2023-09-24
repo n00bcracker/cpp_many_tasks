@@ -5,6 +5,13 @@
 #include <algorithm>
 #include <numeric>
 #include <filesystem>
+#include <cerrno>
+#include <system_error>
+
+#ifdef __linux__
+#include <sys/time.h>
+#include <sys/resource.h>
+#endif
 
 class RandomGenerator {
 public:
@@ -22,9 +29,9 @@ public:
     }
 
     std::string GenString(size_t count, char from = 'a', char to = 'z') {
-        std::uniform_int_distribution dist{from, to};
+        std::uniform_int_distribution<int> dist{from, to};
         std::string result(count, from);
-        for (char& x : result) {
+        for (auto& x : result) {
             x = dist(gen_);
         }
         return result;
@@ -48,7 +55,7 @@ public:
 
     template <class T>
     T GenInt(T from, T to) {
-        std::uniform_int_distribution<T> dist(from, to);
+        std::uniform_int_distribution dist{from, to};
         return dist(gen_);
     }
 
@@ -74,3 +81,13 @@ inline std::filesystem::path GetFileDir(std::string file) {
         throw std::runtime_error{"Bad file name"};
     }
 }
+
+#ifdef __linux__
+inline int64_t GetMemoryUsage() {
+    if (rusage usage; getrusage(RUSAGE_SELF, &usage)) {
+        throw std::system_error{errno, std::generic_category()};
+    } else {
+        return usage.ru_maxrss;
+    }
+}
+#endif

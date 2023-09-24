@@ -1,29 +1,34 @@
 #pragma once
 
-#include <type_traits>
+#include <iterator>
+#include <vector>
+#include <list>
+#include <ranges>
 
-template <class Iterator>
+template <std::bidirectional_iterator Iterator>
 class StrictIterator {
 public:
-    using iterator_category = std::bidirectional_iterator_tag;   // NOLINT
-    using value_type = typename Iterator::value_type;            // NOLINT
-    using difference_type = typename Iterator::difference_type;  // NOLINT
-    using pointer = typename Iterator::pointer;                  // NOLINT
-    using reference = typename Iterator::reference;              // NOLINT
-    using Reference = reference;
+    // NOLINTBEGIN
+    using iterator_type = Iterator;
+    using iterator_concept = std::bidirectional_iterator_tag;
+    using iterator_category = std::bidirectional_iterator_tag;
+    using value_type = std::iter_value_t<Iterator>;
+    using difference_type = std::iter_difference_t<Iterator>;
+    using pointer = std::iterator_traits<Iterator>::pointer;
+    using reference = std::iter_reference_t<Iterator>;
+    // NOLINTEND
 
-    StrictIterator() {
+    StrictIterator() : is_init_{false} {
     }
 
     StrictIterator(Iterator first, Iterator current, Iterator last)
-        : first_(first), current_(current), last_(last) {
-        is_init_ = true;
+        : first_{first}, current_{current}, last_{last}, is_init_{true} {
     }
 
     StrictIterator& operator++() {
         CheckInit();
         if (current_ == last_) {
-            throw std::range_error("out of range (right)");
+            throw std::range_error{"Out of range (right)"};
         }
         ++current_;
         return *this;
@@ -31,15 +36,15 @@ public:
 
     StrictIterator operator++(int) {
         CheckInit();
-        StrictIterator old(*this);
-        this->operator++();
+        auto old = *this;
+        ++*this;
         return old;
     }
 
     StrictIterator& operator--() {
         CheckInit();
         if (current_ == first_) {
-            throw std::range_error("out of range (left)");
+            throw std::range_error{"Out of range (left)"};
         }
         --current_;
         return *this;
@@ -47,57 +52,55 @@ public:
 
     StrictIterator operator--(int) {
         CheckInit();
-        StrictIterator old(*this);
-        this->operator--();
+        auto old = *this;
+        --*this;
         return old;
     }
 
-    Reference operator*() {
+    reference operator*() const {
         CheckInit();
         if (current_ == last_) {
-            throw std::range_error("dereferencing end of sequence");
+            throw std::range_error{"Dereferencing end of sequence"};
         }
         return *current_;
     }
 
-    const Reference operator*() const {
+    iterator_type operator->() const {
         CheckInit();
-        if (current_ == last_) {
-            throw std::range_error("dereferencing end of sequence");
-        }
-        return *current_;
+        return current_;
     }
 
-    auto operator->() {
+    Iterator Base() const {
         CheckInit();
-        return &(this->operator*());
+        return current_;
     }
 
-    auto operator->() const {
-        CheckInit();
-        return &(this->operator*());
-    }
-
-    bool operator==(const StrictIterator& r) const {
-        return current_ == r.current_;
-    }
-
-    bool operator!=(const StrictIterator& r) const {
-        return !(current_ == r.current_);
-    }
+    bool operator==(const StrictIterator& r) const = default;
 
 private:
     Iterator first_, current_, last_;
-    bool is_init_ = false;
+    bool is_init_;
 
-    void CheckInit() {
+    void CheckInit() const {
         if (!is_init_) {
-            throw std::runtime_error("Using uninitialized iterator");
+            throw std::runtime_error{"Using uninitialized iterator"};
         }
     }
 };
 
+template <class T>
+concept CanBeRestricted = std::bidirectional_iterator<StrictIterator<T>>;
+
+static_assert(CanBeRestricted<int*>);
+static_assert(CanBeRestricted<std::vector<int>::iterator>);
+static_assert(CanBeRestricted<std::vector<int>::const_iterator>);
+static_assert(CanBeRestricted<std::list<int>::iterator>);
+static_assert(CanBeRestricted<std::list<int>::const_iterator>);
+
+using IotaIterator = decltype(std::declval<std::ranges::iota_view<int, int>>().begin());
+static_assert(CanBeRestricted<IotaIterator>);
+
 template <class Iterator>
 StrictIterator<Iterator> MakeStrict(Iterator first, Iterator current, Iterator last) {
-    return StrictIterator<Iterator>(first, current, last);
+    return {first, current, last};
 }
