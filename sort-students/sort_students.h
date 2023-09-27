@@ -6,7 +6,7 @@
 
 struct Student {
     std::string name, surname;
-    int year, month, day;
+    int day, month, year;
 };
 
 enum class SortType { kByName, kByDate };
