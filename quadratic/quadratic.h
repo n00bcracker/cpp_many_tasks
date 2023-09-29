@@ -22,8 +22,10 @@ Roots SolveQuadratic(int a, int b, int c) {
             res.first = static_cast<double>(-b) / (2 * a);
         } else {
             res.count = RootCount::kTwo;
-            res.first = (static_cast<double>(-b) - std::sqrt(static_cast<double>(descriminant))) / (2 * a);
-            res.second = (static_cast<double>(-b) + std::sqrt(static_cast<double>(descriminant))) / (2 * a);
+            res.first =
+                (static_cast<double>(-b) - std::sqrt(static_cast<double>(descriminant))) / (2 * a);
+            res.second =
+                (static_cast<double>(-b) + std::sqrt(static_cast<double>(descriminant))) / (2 * a);
 
             if (a < 0) {
                 std::swap(res.first, res.second);
@@ -40,7 +42,6 @@ Roots SolveQuadratic(int a, int b, int c) {
                 res.count = RootCount::kZero;
             }
         }
-
     }
 
     return res;
