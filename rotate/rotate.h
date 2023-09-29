@@ -3,7 +3,6 @@
 #include <stdexcept>
 #include <vector>
 #include <cstddef>
-#include <algorithm>
 
 void Swap(int* a, int* b) {
     int tmp = *a;
