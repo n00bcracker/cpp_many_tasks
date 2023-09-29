@@ -2,6 +2,7 @@
 
 #include <stdexcept>
 #include <cmath>
+#include <algorithm>
 
 enum class RootCount { kZero, kOne, kTwo, kInf };
 
