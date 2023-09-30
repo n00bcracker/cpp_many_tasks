@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <tuple>
+#include <algorithm>
 
 struct StudentName {
     std::string name, surname;
