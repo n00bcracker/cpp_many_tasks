@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <stdexcept>
+#include <algorithm>
 
 struct Student {
     std::string name, surname;
@@ -11,6 +12,43 @@ struct Student {
 
 enum class SortType { kByName, kByDate };
 
+class CompareStudents {
+    SortType sort_type_;
+
+public:
+    CompareStudents(SortType sort_type) : sort_type_(sort_type) {
+    }
+
+    bool operator()(const Student& s1, const Student& s2) const {
+        int bday_student1, bday_student2;
+        bday_student1 = GetBday(s1);
+        bday_student2 = GetBday(s2);
+        std::string fullname_s1, fullname_s2;
+        fullname_s1 = s1.surname + s1.name;
+        fullname_s2 = s2.surname + s2.name;
+
+        if (sort_type_ == SortType::kByDate) {
+            if (bday_student1 == bday_student2) {
+                return fullname_s1 < fullname_s2;
+            } else {
+                return bday_student1 < bday_student2;
+            }
+        } else if (sort_type_ == SortType::kByName) {
+            if (fullname_s1 == fullname_s2) {
+                return bday_student1 < bday_student2;
+            } else {
+                return fullname_s1 < fullname_s2;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    static int GetBday(const Student& student) {
+        return student.year * 10000 + student.month * 100 + student.day;
+    }
+};
+
 void SortStudents(std::vector<Student>* students, SortType sort_type) {
-    throw std::runtime_error{"Not implemented"};
+    std::ranges::sort(*students, CompareStudents(sort_type));
 }
