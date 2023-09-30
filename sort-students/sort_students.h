@@ -20,7 +20,7 @@ public:
     }
 
     bool operator()(const Student& s1, const Student& s2) const {
-        int bday_student1, bday_student2;
+        int64_t bday_student1, bday_student2;
         bday_student1 = GetBday(s1);
         bday_student2 = GetBday(s2);
         std::string fullname_s1, fullname_s2;
@@ -44,8 +44,9 @@ public:
         }
     }
 
-    static int GetBday(const Student& student) {
-        return student.year * 10000 + student.month * 100 + student.day;
+    static int64_t GetBday(const Student& student) {
+        return static_cast<int64_t>(student.year) * 10000 +
+               static_cast<int64_t>(student.month) * 100 + student.day;
     }
 };
 
