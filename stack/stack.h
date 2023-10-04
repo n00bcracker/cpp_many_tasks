@@ -5,6 +5,7 @@
 
 class Stack {
     std::vector<int> stack_;
+
 public:
     void Push(int x) {
         stack_.push_back(x);
