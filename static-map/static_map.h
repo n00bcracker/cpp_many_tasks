@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 #include <utility>
-#include <ranges>
+#include <algorithm>
 
 class StaticMap {
     std::vector<std::pair<std::string, std::string>> ordered_map_;
