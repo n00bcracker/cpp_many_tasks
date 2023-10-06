@@ -47,7 +47,7 @@ add_custom_target(test-all)
 
 function(add_catch TARGET)
   add_shad_executable(${TARGET} ${ARGN})
-  target_link_libraries(${TARGET} Catch2::Catch2WithMain)
+  target_link_libraries(${TARGET} PRIVATE Catch2::Catch2WithMain)
 
   if (TEST_SOLUTION)
     add_custom_target(

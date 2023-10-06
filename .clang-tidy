@@ -41,3 +41,7 @@ CheckOptions:
     value: CamelCase
   - key: readability-identifier-naming.TypeTemplateParameterIgnoredRegexp
     value: expr-type
+  - key: readability-identifier-naming.FunctionIgnoredRegexp
+    value: ^(begin|end)$
+  - key: readability-identifier-naming.TypeAliasIgnoredRegexp
+    value: ^(iterator_category|value_type|difference_type|pointer|reference|iterator_type|iterator_concept)$

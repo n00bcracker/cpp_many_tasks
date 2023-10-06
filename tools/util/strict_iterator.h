@@ -8,7 +8,6 @@
 template <std::bidirectional_iterator Iterator>
 class StrictIterator {
 public:
-    // NOLINTBEGIN
     using iterator_type = Iterator;
     using iterator_concept = std::bidirectional_iterator_tag;
     using iterator_category = std::bidirectional_iterator_tag;
@@ -16,7 +15,6 @@ public:
     using difference_type = std::iter_difference_t<Iterator>;
     using pointer = std::iterator_traits<Iterator>::pointer;
     using reference = std::iter_reference_t<Iterator>;
-    // NOLINTEND
 
     StrictIterator() : is_init_{false} {
     }
