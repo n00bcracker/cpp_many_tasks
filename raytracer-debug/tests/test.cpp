@@ -51,7 +51,7 @@ TEST_CASE("Triangle2") {
     CheckImage("triangle/scene.obj", "triangle/normal2.png", camera_opts, render_opts);
 }
 
-TEST_CASE("Classic box") {
+TEST_CASE("Classic box", "[no_asan]") {
     CameraOptions camera_opts{.screen_width = 500,
                               .screen_height = 500,
                               .look_from = {-.5, 1.5, .98},
@@ -82,7 +82,7 @@ TEST_CASE("Box with spheres") {
     CheckImage("box/cube.obj", "box/normal.png", camera_opts, render_opts);
 }
 
-TEST_CASE("Deer") {
+TEST_CASE("Deer", "[no_asan]") {
     CameraOptions camera_opts{.screen_width = 500,
                               .screen_height = 500,
                               .look_from = {100., 200., 150.},
