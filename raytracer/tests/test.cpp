@@ -80,7 +80,7 @@ TEST_CASE("Distorted box", "[no_asan]") {
     CheckImage("distorted_box/CornellBox.obj", "distorted_box/result.png", camera_opts, {4});
 }
 
-TEST_CASE("Deer") {
+TEST_CASE("Deer", "[no_asan]") {
     CameraOptions camera_opts{.screen_width = 500,
                               .screen_height = 500,
                               .look_from = {100., 200., 150.},
