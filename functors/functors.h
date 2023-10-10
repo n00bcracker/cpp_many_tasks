@@ -48,10 +48,7 @@ public:
 
     template <typename T>
     bool operator()(const T& lhr, const T& rhr) {
-        if (rhr < lhr) {
-            ++comparisons_cnt_;
-        }
-
+        ++comparisons_cnt_;
         return lhr < rhr;
     }
 
