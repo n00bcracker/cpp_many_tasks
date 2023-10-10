@@ -40,21 +40,21 @@ auto MakeReverseBinaryFunctor(auto functor) {
 }
 
 class Comparator {
-    inline static size_t comparisons_cnt_;
+    inline static size_t comparisons_cnt;
 
 public:
     Comparator() {
-        comparisons_cnt_ = 0;
+        comparisons_cnt = 0;
     }
 
     template <typename T>
     bool operator()(const T& lhr, const T& rhr) {
-        ++comparisons_cnt_;
+        ++comparisons_cnt;
         return lhr < rhr;
     }
 
     size_t GetComparisons() {
-        return comparisons_cnt_;
+        return comparisons_cnt;
     }
 };
 
