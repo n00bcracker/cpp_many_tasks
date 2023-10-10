@@ -20,7 +20,7 @@ struct Concat {
     template <typename T>
     T operator()(const T& lhr, const T& rhr) {
         T res = lhr;
-        res.reserve(res.size() + rhr.size())
+        res.reserve(res.size() + rhr.size());
 
         for (auto iter = rhr.begin(); iter != rhr.end(); ++iter) {
             res.push_back(*iter);
