@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <cerrno>
 #include <system_error>
+#include <chrono>
 
 #ifdef __linux__
 #include <sys/time.h>
@@ -82,9 +83,41 @@ inline std::filesystem::path GetFileDir(std::string file) {
     }
 }
 
+class Timer {
+    using Clock = std::chrono::steady_clock;
+    struct Times {
+        Clock::duration wall_time;
+        std::chrono::microseconds cpu_time; 
+    };
+
+public:
+    Times GetTimes() const {
+        return {Clock::now() - wall_start_, GetCPUTime() - cpu_start_};
+    }
+
+private:
+
+    static std::chrono::microseconds GetCPUTime() {
+#ifdef __linux__
+        if (rusage usage; ::getrusage(RUSAGE_SELF, &usage)) {
+            throw std::system_error{errno, std::generic_category()};
+        } else {
+            auto time = usage.ru_utime;
+            return std::chrono::microseconds{1'000'000ll * time.tv_sec + time.tv_usec};
+        }
+#else
+        auto time = Clock::now().time_since_epoch();
+        return std::chrono::duration_cast<std::chrono::microseconds>(time);
+#endif
+    }
+
+    const std::chrono::time_point<Clock> wall_start_ = Clock::now();
+    const std::chrono::microseconds cpu_start_ = GetCPUTime(); 
+};
+
 #ifdef __linux__
 inline int64_t GetMemoryUsage() {
-    if (rusage usage; getrusage(RUSAGE_SELF, &usage)) {
+    if (rusage usage; ::getrusage(RUSAGE_SELF, &usage)) {
         throw std::system_error{errno, std::generic_category()};
     } else {
         return usage.ru_maxrss;

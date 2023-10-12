@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <span>
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators_adapters.hpp>
@@ -24,14 +25,14 @@ template <class T, class Predicate>
 void Check(std::vector<T>&& data, Predicate pred) {
     auto copy = data;
     auto it = std::partition(copy.begin(), copy.end(), pred);
-    std::ranges::subrange expected_first_part{copy.begin(), it};
-    std::ranges::subrange expected_second_part{it, copy.end()};
+    std::span expected_first_part{copy.begin(), it};
+    std::span expected_second_part{it, copy.end()};
 
     auto first = MakeStrict(data.begin(), data.begin(), data.end());
     auto last = MakeStrict(data.begin(), data.end(), data.end());
     it = Partition(first, last, pred).Base();
-    std::ranges::subrange first_part{data.begin(), it};
-    std::ranges::subrange second_part{it, data.end()};
+    std::span first_part{data.begin(), it};
+    std::span second_part{it, data.end()};
 
     CheckUnorderedEquals(first_part, expected_first_part);
     CheckUnorderedEquals(second_part, expected_second_part);

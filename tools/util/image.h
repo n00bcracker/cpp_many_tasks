@@ -4,6 +4,7 @@
 #include <cassert>
 #include <filesystem>
 #include <cstdio>
+#include <span>
 
 #include <png.h>
 
@@ -30,7 +31,7 @@ public:
     }
 
     ~Image() {
-        for (auto row : std::ranges::subrange{bytes_, bytes_ + height_}) {
+        for (auto row : std::span{bytes_, bytes_ + height_}) {
             delete[] row;
         }
         delete[] bytes_;
@@ -107,7 +108,7 @@ private:
         height_ = height;
         width_ = width;
         bytes_ = new png_bytep[height_];
-        for (auto& row : std::ranges::subrange{bytes_, bytes_ + height_}) {
+        for (auto*& row : std::span{bytes_, bytes_ + height_}) {
             row = new png_byte[4 * width_]{};
             for (auto x : std::views::iota(0, width_)) {
                 row[4 * x + 3] = 255;
