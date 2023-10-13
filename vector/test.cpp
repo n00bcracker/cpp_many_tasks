@@ -321,6 +321,43 @@ TEST_CASE("Valid after move") {
         a.PushBack(3);
         Check(a, {1, 4, 3});
     }
+    {
+        Vector a = {-34, 10};
+        auto b = std::move(a);
+        auto size = a.Size();
+        for (auto i : std::views::iota(size_t{0}, size)) {
+            a[i] = i;
+        }
+        for (auto i = 0; auto& x : a) {
+            x = i++;
+        }
+        a.PushBack(3);
+        a.PushBack(4);
+        a.PushBack(5);
+        CHECK(a[size] == 3);
+        CHECK(a[size + 1] == 4);
+        CHECK(a[size + 2] == 5);
+        CHECK(a.Size() == size + 3);
+    }
+    {
+        Vector a = {-34, 10};
+        Vector b = {1, 2, 3};
+        b = std::move(a);
+        auto size = a.Size();
+        for (auto i : std::views::iota(size_t{0}, size)) {
+            a[i] = i;
+        }
+        for (auto i = 0; auto& x : a) {
+            x = i++;
+        }
+        a.PushBack(3);
+        a.PushBack(4);
+        a.PushBack(5);
+        CHECK(a[size] == 3);
+        CHECK(a[size + 1] == 4);
+        CHECK(a[size + 2] == 5);
+        CHECK(a.Size() == size + 3);
+    }
 }
 
 TEST_CASE("Move speed") {

@@ -76,7 +76,7 @@ TEST_CASE("Big") {
 
     for (auto i = 0; i < kSize; ++i) {
         auto ind = rnd.GenInt(1, kSize - 1);
-        s[ind] = rnd.GenInt('a', 'z');
+        s[ind] = rnd.GenInt<int>('a', 'z');
         REQUIRE(s[ind] == sv[ind - 1]);
     }
     REQUIRE(sv.Size() == kSize - 1);
