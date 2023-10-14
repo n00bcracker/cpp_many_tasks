@@ -376,3 +376,30 @@ TEST_CASE("Move speed") {
         vectors[i] = std::move(vectors[i - 1]);
     }
 }
+
+TEST_CASE("Self assignment") {
+    {
+        Vector a;
+        auto& r = a;
+        a = r;
+        Check(a, {});
+    }
+    {
+        Vector a = {1, 2, 3};
+        auto& r = a;
+        a = r;
+        Check(a, {1, 2, 3});
+    }
+    {
+        Vector a;
+        auto& r = a;
+        a = std::move(r);
+        Check(a, {});
+    }
+    {
+        Vector a = {1, 2, 3};
+        auto& r = a;
+        a = std::move(r);
+        Check(a, {1, 2, 3});
+    }
+}
