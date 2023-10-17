@@ -5,11 +5,16 @@
 #include <sphere.h>
 #include <vector.h>
 
+#include <array>
+
 struct Object {
     const Material* material = nullptr;
     Triangle polygon;
+    std::array<Vector, 3> normals;
 
-    const Vector* GetNormal(size_t index) const;
+    const Vector* GetNormal(size_t index) const {
+        return &normals[index];
+    }
 };
 
 struct SphereObject {

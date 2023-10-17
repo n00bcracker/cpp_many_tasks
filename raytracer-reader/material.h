@@ -12,4 +12,7 @@ struct Material {
     double specular_exponent;
     double refraction_index;
     Vector albedo;
+
+    Material() : intensity(0, 0, 0), refraction_index(1), albedo{1, 0, 0} {
+    }
 };

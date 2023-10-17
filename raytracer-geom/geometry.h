@@ -15,18 +15,6 @@ std::optional<Intersection> GetIntersection(const Ray& ray, const Sphere& sphere
     const Vector& ray_direction = ray.GetDirection();
     const Vector margin = ray.GetOrigin() - sphere.GetCenter();
     double r = sphere.GetRadius();
-    // (x-x0)**2 + (y-y0)**2 + (z-z0)**2 = r**2
-    // x = x1 + t * vx
-    // y = y1 + t * vy
-    // z = z1 + t * vz
-
-    // (t * vx + x1 - x0)**2 + (t * vy + y1 - y0)**2 + (t * vz + z1 - z0)**2 = r**2
-
-    // (t * vx)**2 + 2 * t * vx * (x1 - x0) + (x1 - x0)**2 + (t * vy)**2 + 2 * t * vy * (y1 - y0) +
-    // + (y1 - y0)**2 + (t * vz)**2 + 2 * t * vz * (z1 - z0) + (z1 - z0)**2 = r**2
-
-    // t**2 * (vx**2 + vy**2 + vz**2) + 2 * t * (vx * (x1 - x0) + vy * (y1 - y0) + vz * (z1 - z0)) +
-    // + (x1 - x0)**2 + (y1 - y0)**2 + (z1 - z0)**2 - r**2 = 0
 
     double a, b, c;
     a = DotProduct(ray_direction, ray_direction);
