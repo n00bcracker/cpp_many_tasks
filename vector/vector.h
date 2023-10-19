@@ -188,7 +188,7 @@ public:
             return iterator_ - other.iterator_;
         }
 
-        value_type& operator[](size_t index) const {
+        value_type& operator[](int index) const {
             return *(iterator_ + index);
         }
 
