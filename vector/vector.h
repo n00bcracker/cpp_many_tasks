@@ -40,15 +40,16 @@ public:
     }
 
     const Vector& operator=(const Vector& other) {
-        Vector vector(other);
+        if (this != &other) {
+            if (!data_) {
+                std::free(data_);
+                size_ = 0;
+                capacity_ = 0;
+            }
 
-        if (!data_) {
-            std::free(data_);
-            size_ = 0;
-            capacity_ = 0;
+            Vector vector(other);
+            *this = std::move(vector);
         }
-
-        *this = std::move(vector);
 
         return *this;
     }
