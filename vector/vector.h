@@ -27,7 +27,7 @@ public:
 
     Vector(const Vector& other) : Vector() {
         Reserve(other.size_);
-        if (data_ && other.data_) {
+        if ((data_ != nullptr) && (other.data_ != nullptr)) {
             std::memcpy(data_, other.data_, other.size_ * sizeof(int));
         }
         size_ = other.size_;
@@ -41,12 +41,6 @@ public:
 
     const Vector& operator=(const Vector& other) {
         if (this != &other) {
-            if (!data_) {
-                std::free(data_);
-                size_ = 0;
-                capacity_ = 0;
-            }
-
             Vector vector(other);
             *this = std::move(vector);
         }
@@ -56,7 +50,7 @@ public:
 
     const Vector& operator=(Vector&& other) {
         if (this != &other) {
-            if (!data_) {
+            if (data_ != nullptr) {
                 std::free(data_);
                 size_ = 0;
                 capacity_ = 0;
