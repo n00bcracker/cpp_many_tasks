@@ -27,7 +27,9 @@ public:
 
     Vector(const Vector& other) : Vector() {
         Reserve(other.size_);
-        std::memcpy(data_, other.data_, other.size_ * sizeof(int));
+        if (data_ && other.data_) {
+            std::memcpy(data_, other.data_, other.size_ * sizeof(int));
+        }
         size_ = other.size_;
     }
 
