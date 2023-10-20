@@ -4,6 +4,7 @@
 #include <array>
 
 #include <geometry.h>
+#include <options/render_options.h>
 
 class Pixel {
 public:
