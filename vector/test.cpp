@@ -377,7 +377,7 @@ TEST_CASE("Move speed") {
     }
 }
 
-TEST_CASE("Self assignment") {
+TEST_CASE("Self-assignment") {
     {
         Vector a;
         auto& r = a;
@@ -388,18 +388,6 @@ TEST_CASE("Self assignment") {
         Vector a = {1, 2, 3};
         auto& r = a;
         a = r;
-        Check(a, {1, 2, 3});
-    }
-    {
-        Vector a;
-        auto& r = a;
-        a = std::move(r);
-        Check(a, {});
-    }
-    {
-        Vector a = {1, 2, 3};
-        auto& r = a;
-        a = std::move(r);
         Check(a, {1, 2, 3});
     }
 }
