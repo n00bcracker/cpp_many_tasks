@@ -3,7 +3,7 @@
 #include <vector>
 #include <array>
 
-#include <raytracer.h>
+#include <geometry.h>
 
 class Pixel {
 public:
