@@ -108,16 +108,9 @@ std::optional<Vector> Refract(const Vector& ray, const Vector& normal, double et
 
 Vector GetBarycentricCoords(const Triangle& triangle, const Vector& point) {
     Vector res;
-    Vector r = triangle[0] - point;
-    Vector edge1 = triangle[1] - triangle[0];
-    Vector edge2 = triangle[2] - triangle[0];
-    Vector comp0 = Vector(edge1[0], edge2[0], r[0]);
-    Vector comp1 = Vector(edge1[1], edge2[1], r[1]);
-    Vector normal = CrossProduct(comp0, comp1);
-    normal /= normal[2];
-
-    res[1] = normal[0];
-    res[2] = normal[1];
-    res[0] = 1.0 - res[1] - res[2];
+    double full_area = triangle.Area();
+    res[0] = Triangle(point, triangle[1], triangle[2]).Area() / full_area;
+    res[1] = Triangle(point, triangle[0], triangle[2]).Area() / full_area;
+    res[2] = 1 - res[0] - res[1];
     return res;
 }
