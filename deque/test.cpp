@@ -13,7 +13,18 @@
 void Check(const Deque& actual, const std::vector<int>& expected) {
     REQUIRE(actual.Size() == expected.size());
     for (auto i : std::views::iota(size_t{0}, expected.size())) {
-        REQUIRE(actual[i] == expected[i]);
+        if (actual[i] != expected[i]) {
+            FAIL(actual[i] << " != " << expected[i]);
+        }
+    }
+}
+
+void CheckEq(const Deque& a, const Deque& b) {
+    REQUIRE(a.Size() == b.Size());
+    for (auto i : std::views::iota(size_t{0}, a.Size())) {
+        if (a[i] != b[i]) {
+            FAIL(a[i] << " != " << b[i]);
+        }
     }
 }
 
@@ -150,13 +161,16 @@ TEST_CASE("Stress") {
     std::uniform_int_distribution dist{1, 10};
     Deque a;
     std::deque<int> b;
+    std::deque<int*> p;
     for (auto i : std::views::iota(0, kNumIterations)) {
-        if (dist(gen) > 5) {
+        if (dist(gen) > 1) {
             a.PushFront(i);
             b.push_front(i);
+            p.push_front(&a[0]);
         } else {
             a.PushBack(i);
             b.push_back(i);
+            p.push_back(&a[i]);
         }
     }
 
@@ -166,31 +180,39 @@ TEST_CASE("Stress") {
         if (code == 1) {
             a.PushFront(value);
             b.push_front(value);
+            p.push_front(&a[0]);
         } else if (code == 2) {
             a.PushBack(value);
             b.push_back(value);
-        } else if (code < 5) {
+            p.push_back(&a[a.Size() - 1]);
+        } else if (code < 6) {
             a.PopFront();
             b.pop_front();
-        } else if (code < 7) {
+            p.pop_front();
+        } else if (code < 9) {
             a.PopBack();
             b.pop_back();
+            p.pop_back();
         } else {
             auto index = value % a.Size();
             REQUIRE(a[index] == b[index]);
+            REQUIRE(&a[index] == p[index]);
         }
         REQUIRE(a.Size() == b.size());
         if (i % (kNumIterations / 10) == 0) {
             auto c = a;
+            auto d = std::move(a);
             a = c;
-            c.PushBack(1);
-            c.PushFront(1);
+            c = std::move(d);
             std::swap(a, c);
-            a.PopBack();
-            a.PopFront();
+            CheckEq(a, c);
         }
     }
     Check(a, {b.begin(), b.end()});
+    REQUIRE(a.Size() == p.size());
+    for (size_t i = 0; i < a.Size(); ++i) {
+        CHECK(&a[i] == p[i]);
+    }
 }
 
 void CheckEmptyCorrectness(void (Deque::*push)(int), void (Deque::*pop)()) {
@@ -231,6 +253,18 @@ TEST_CASE("Fast self-assignment") {
 #ifdef __linux__
 
 TEST_CASE("Memory usage", "[.][memory][no_asan]") {
+    {
+        auto before = GetMemoryUsage();
+        std::vector<Deque> v(1'000);
+        for (auto& d : v) {
+            for (auto i : std::views::iota(0, 200)) {
+                d.PushBack(i);
+                d.PushFront(i);
+            }
+        }
+        CHECK(before + 10'000 > GetMemoryUsage());
+    }
+
     Deque a(1'000'000);
     CHECK(GetMemoryUsage() < 100'000);
 
