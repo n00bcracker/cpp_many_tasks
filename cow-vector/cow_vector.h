@@ -2,25 +2,88 @@
 
 #include <string>
 #include <cstddef>
+#include <vector>
+
+struct State {
+    size_t ref_count;
+    std::vector<std::string> vector;
+
+    State() : ref_count(1) {
+    }
+
+    State(const std::vector<std::string>& other_vector) : ref_count(1), vector(other_vector) {
+    }
+};
 
 class COWVector {
 public:
-    COWVector();
-    ~COWVector();
+    COWVector() {
+        cow_vector_ = new State();
+    }
 
-    COWVector(const COWVector& other);
-    COWVector& operator=(const COWVector& other);
+    ~COWVector() {
+        if (--cow_vector_->ref_count == 0) {
+            delete cow_vector_;
+        }
+    }
 
-    size_t Size() const;
+    COWVector(const COWVector& other) {
+        cow_vector_ = other.cow_vector_;
+        ++cow_vector_->ref_count;
+    }
 
-    void Resize(size_t size);
+    COWVector& operator=(const COWVector& other) {
+        if ((cow_vector_ != other.cow_vector_) && (--cow_vector_->ref_count == 0)) {
+            delete cow_vector_;
+        }
 
-    const std::string& Get(size_t at) const;
-    const std::string& Back() const;
+        cow_vector_ = other.cow_vector_;
+        ++cow_vector_->ref_count;
 
-    void PushBack(const std::string& value);
+        return *this;
+    }
 
-    void Set(size_t at, const std::string& value);
+    size_t Size() const {
+        return cow_vector_->vector.size();
+    }
+
+    void Resize(size_t size) {
+        if (size != Size()) {
+            if (cow_vector_->ref_count > 1) {
+                --cow_vector_->ref_count;
+                cow_vector_ = new State(cow_vector_->vector);
+            }
+
+            cow_vector_->vector.resize(size);
+        }
+    }
+
+    const std::string& Get(size_t at) const {
+        return cow_vector_->vector.at(at);
+    }
+
+    const std::string& Back() const {
+        return cow_vector_->vector.back();
+    }
+
+    void PushBack(const std::string& value) {
+        if (cow_vector_->ref_count > 1) {
+            --cow_vector_->ref_count;
+            cow_vector_ = new State(cow_vector_->vector);
+        }
+
+        cow_vector_->vector.push_back(value);
+    }
+
+    void Set(size_t at, const std::string& value) {
+        if (cow_vector_->ref_count > 1) {
+            --cow_vector_->ref_count;
+            cow_vector_ = new State(cow_vector_->vector);
+        }
+
+        cow_vector_->vector[at] = value;
+    }
 
 private:
+    State* cow_vector_;
 };
