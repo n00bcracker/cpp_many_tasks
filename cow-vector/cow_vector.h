@@ -33,12 +33,14 @@ public:
     }
 
     COWVector& operator=(const COWVector& other) {
-        if ((cow_vector_ != other.cow_vector_) && (--cow_vector_->ref_count == 0)) {
-            delete cow_vector_;
-        }
+        if (cow_vector_ != other.cow_vector_) {
+            if (--cow_vector_->ref_count == 0) {
+                delete cow_vector_;
+            }
 
-        cow_vector_ = other.cow_vector_;
-        ++cow_vector_->ref_count;
+            cow_vector_ = other.cow_vector_;
+            ++cow_vector_->ref_count;
+        }
 
         return *this;
     }
