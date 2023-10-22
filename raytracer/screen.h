@@ -61,6 +61,7 @@ public:
     }
 
     void PostProcessing(RenderMode render_mode) {
+        double eps = 1e-9;
         if (render_mode == RenderMode::kDepth) {
             double max_dist = -1;
             for (size_t i = 0; i < height_; ++i) {
@@ -110,7 +111,7 @@ public:
                         const auto& color = screen_[i][j].GetColor();
                         std::array<double, 3> new_color;
                         for (auto i = 0; i < 3; ++i) {
-                            new_color[i] = color[i] * (color[i] / std::pow(max_intensity, 2) + 1) /
+                            new_color[i] = color[i] * (color[i] / std::pow(max_intensity + eps, 2) + 1) /
                                            (1 + color[i]);
                             new_color[i] = std::pow(new_color[i], 1.0 / 2.2);
                         }
