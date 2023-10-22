@@ -11,6 +11,7 @@
 #include <cmath>
 #include <array>
 #include <optional>
+#include <algorithm>
 
 class LookAtCamera {
 public:
@@ -71,8 +72,7 @@ Screen CreateScreen(const CameraOptions& camera_options) {
     return screen;
 }
 
-std::optional<Vector> ComputeObjectNormal(const Ray& ray, const Object& object,
-                                          const Vector& position) {
+std::optional<Vector> ComputeObjectNormal(const Object& object, const Vector& position) {
     double eps = 1e-9;
     Vector normal1 = *object.GetNormal(0);
     Vector normal2 = *object.GetNormal(1);
@@ -81,33 +81,34 @@ std::optional<Vector> ComputeObjectNormal(const Ray& ray, const Object& object,
     if (Length(normal1) > eps && Length(normal2) > eps && Length(normal3) > eps) {
         Vector bar_coord = GetBarycentricCoords(object.polygon, position);
         Vector normal = normal1 * bar_coord[0] + normal2 * bar_coord[1] + normal2 * bar_coord[2];
-        if (DotProduct(ray.GetDirection(), normal) > eps) {
-            normal = -1 * normal;
-        }
         return normal;
     } else {
         return std::nullopt;
     }
 }
 
-std::optional<std::array<double, 3>> ComputeColor(const Ray& ray, const Scene& scena,
-                                                  const RenderOptions& render_options) {
-    const auto& objects = scena.GetObjects();
-    const auto& spheres = scena.GetSphereObjects();
+Vector ComputeNormal(const Intersection& intersect, const Object* object = nullptr) {
+    std::optional<Vector> normal = std::nullopt;
+    if (object) {
+        normal = ComputeObjectNormal(*object, intersect.GetPosition());
+    }
+
+    if (!normal.has_value()) {
+        normal = intersect.GetNormal();
+    }
+
+    return *normal;
+}
+
+std::optional<Intersection> NearestIntersection(const Ray& ray, const Scene& scene,
+                                                const SphereObject** nearest_sphere,
+                                                const Object** nearest_object) {
+    const auto& objects = scene.GetObjects();
+    const auto& spheres = scene.GetSphereObjects();
 
     std::optional<Intersection> nearest_intersection = std::nullopt;
-    const Object* nearest_object = nullptr;
-    const SphereObject* nearest_sphere = nullptr;
-
-    for (const auto& object : objects) {
-        auto intersection = GetIntersection(ray, object.polygon);
-        if (intersection.has_value() &&
-            (!nearest_intersection.has_value() ||
-             (intersection->GetDistance() < nearest_intersection->GetDistance()))) {
-            nearest_intersection = *intersection;
-            nearest_object = &object;
-        }
-    }
+    *nearest_sphere = nullptr;
+    *nearest_object = nullptr;
 
     for (const auto& sphere : spheres) {
         auto intersection = GetIntersection(ray, sphere.sphere);
@@ -115,9 +116,33 @@ std::optional<std::array<double, 3>> ComputeColor(const Ray& ray, const Scene& s
             (!nearest_intersection.has_value() ||
              (intersection->GetDistance() < nearest_intersection->GetDistance()))) {
             nearest_intersection = *intersection;
-            nearest_sphere = &sphere;
+            *nearest_sphere = &sphere;
         }
     }
+
+    for (const auto& object : objects) {
+        auto intersection = GetIntersection(ray, object.polygon);
+        if (intersection.has_value() &&
+            (!nearest_intersection.has_value() ||
+             (intersection->GetDistance() < nearest_intersection->GetDistance()))) {
+            nearest_intersection = *intersection;
+            *nearest_object = &object;
+        }
+    }
+
+    return nearest_intersection;
+}
+
+std::optional<std::array<double, 3>> ComputeColor(const Ray& ray, const Scene& scene,
+                                                  const RenderOptions& render_options,
+                                                  int cur_depth, int max_depth) {
+    double eps = 1e-9;
+    const auto& lights = scene.GetLights();
+    const SphereObject* nearest_sphere;
+    const Object* nearest_object;
+
+    std::optional<Intersection> nearest_intersection =
+        NearestIntersection(ray, scene, &nearest_sphere, &nearest_object);
 
     if (render_options.mode == RenderMode::kDepth) {
         if (nearest_intersection.has_value()) {
@@ -128,21 +153,103 @@ std::optional<std::array<double, 3>> ComputeColor(const Ray& ray, const Scene& s
         }
     } else if (render_options.mode == RenderMode::kNormal) {
         if (nearest_intersection.has_value()) {
-            if (nearest_sphere) {
-                const auto& normal = nearest_intersection->GetNormal();
-                return std::array<double, 3>{normal[0], normal[1], normal[2]};
-            } else if (nearest_object) {
-                auto normal =
-                    ComputeObjectNormal(ray, *nearest_object, nearest_intersection->GetPosition());
-                if (!normal.has_value()) {
-                    normal = nearest_intersection->GetNormal();
-                }
-
-                return std::array<double, 3>{(*normal)[0], (*normal)[1], (*normal)[2]};
-            }
+            const Vector normal = ComputeNormal(*nearest_intersection, nearest_object);
+            return std::array<double, 3>{normal[0], normal[1], normal[2]};
         } else {
             return std::nullopt;
         }
+    } else if (render_options.mode == RenderMode::kFull) {
+        Vector color;
+        if (nearest_intersection.has_value()) {
+            const Material* material;
+            const Vector normal = ComputeNormal(*nearest_intersection, nearest_object);
+            const Ray reflected_ray(nearest_intersection->GetPosition() + 1.5 * eps * normal,
+                                    Reflect(ray.GetDirection(), normal));
+            if (nearest_object) {
+                material = nearest_object->material;
+            } else {
+                material = nearest_sphere->material;
+            }
+
+            color += material->ambient_color + material->intensity;
+
+            for (const auto& light : lights) {
+                const Ray light_ray =
+                    Ray(light.position, nearest_intersection->GetPosition() - light.position);
+                const SphereObject* dummy_sphere;
+                const Object* dummy_object;
+                auto light_intersection =
+                    NearestIntersection(light_ray, scene, &dummy_sphere, &dummy_object);
+                const Vector distance_vector =
+                    light_intersection->GetPosition() - nearest_intersection->GetPosition();
+                if (Length(distance_vector) < eps) {
+                    Vector ld = std::max(DotProduct(-1 * light_ray.GetDirection(), normal), 0.0) *
+                                light.intensity;
+                    for (auto i = 0; i < 3; ++i) {
+                        ld[i] *= material->diffuse_color[i];
+                    }
+                    color += material->albedo[0] * ld;
+
+                    Vector ls = std::pow(std::max(DotProduct(-1 * light_ray.GetDirection(),
+                                                             reflected_ray.GetDirection()),
+                                                  0.0),
+                                         material->specular_exponent) *
+                                light.intensity;
+                    for (auto i = 0; i < 3; ++i) {
+                        ls[i] *= material->specular_color[i];
+                    }
+                    color += material->albedo[0] * ls;
+                }
+            }
+
+            if (cur_depth < max_depth) {
+                if (nearest_object ||
+                    Length(reflected_ray.GetOrigin() - nearest_sphere->sphere.GetCenter()) >
+                        nearest_sphere->sphere.GetRadius() + eps) {
+                    const auto reflected_color = ComputeColor(reflected_ray, scene, render_options,
+                                                              cur_depth + 1, max_depth);
+                    if (reflected_color.has_value()) {
+                        color += material->albedo[1] * Vector((*reflected_color)[0],
+                                                              (*reflected_color)[1],
+                                                              (*reflected_color)[2]);
+                    }
+                }
+
+                std::optional<Vector> refract_direction;
+                if (nearest_object == nullptr &&
+                    Length(reflected_ray.GetOrigin() - nearest_sphere->sphere.GetCenter()) <
+                        nearest_sphere->sphere.GetRadius() - eps) {
+                    refract_direction =
+                        Refract(ray.GetDirection(), normal, material->refraction_index);
+                    if (refract_direction.has_value()) {
+                        Ray refracted_ray(nearest_intersection->GetPosition() - 1.5 * eps * normal,
+                                          *refract_direction);
+                        const auto refracted_color = ComputeColor(
+                            refracted_ray, scene, render_options, cur_depth + 1, max_depth);
+                        if (refracted_color.has_value()) {
+                            color += Vector((*refracted_color)[0], (*refracted_color)[1],
+                                            (*refracted_color)[2]);
+                        }
+                    }
+                } else {
+                    refract_direction =
+                        Refract(ray.GetDirection(), normal, 1 / material->refraction_index);
+                    if (refract_direction.has_value()) {
+                        Ray refracted_ray(nearest_intersection->GetPosition() - 1.5 * eps * normal,
+                                          *refract_direction);
+                        const auto refracted_color = ComputeColor(
+                            refracted_ray, scene, render_options, cur_depth + 1, max_depth);
+                        if (refracted_color.has_value()) {
+                            color += material->albedo[2] * Vector((*refracted_color)[0],
+                                                                  (*refracted_color)[1],
+                                                                  (*refracted_color)[2]);
+                        }
+                    }
+                }
+            }
+        }
+
+        return std::array<double, 3>{color[0], color[1], color[2]};
     }
 
     return std::nullopt;
@@ -158,7 +265,7 @@ Image Render(const std::filesystem::path& path, const CameraOptions& camera_opti
         for (size_t j = 0; j < screen.GetWidth(); ++j) {
             Ray ray({0, 0, 0}, screen[i][j].GetCenterPosition());
             ray = camera.RayTransform(ray);
-            auto color = ComputeColor(ray, scene, render_options);
+            auto color = ComputeColor(ray, scene, render_options, 0, render_options.depth);
             if (color.has_value()) {
                 screen[i][j].SetColor(*color);
             }

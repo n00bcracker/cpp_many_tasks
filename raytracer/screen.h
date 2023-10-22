@@ -2,6 +2,8 @@
 
 #include <vector>
 #include <array>
+#include <algorithm>
+#include <cmath>
 
 #include <geometry.h>
 #include <options/render_options.h>
@@ -88,6 +90,31 @@ public:
                             {normal[0] / 2 + 0.5, normal[1] / 2 + 0.5, normal[2] / 2 + 0.5});
                     } else {
                         screen_[i][j].SetColor({0, 0, 0});
+                    }
+                }
+            }
+        } else if (render_mode == RenderMode::kFull) {
+            double max_intensity = -1;
+            for (size_t i = 0; i < height_; ++i) {
+                for (size_t j = 0; j < width_; ++j) {
+                    if (screen_[i][j].IsColored()) {
+                        const auto& color = screen_[i][j].GetColor();
+                        max_intensity = std::max({max_intensity, color[0], color[1], color[2]});
+                    }
+                }
+            }
+
+            for (size_t i = 0; i < height_; ++i) {
+                for (size_t j = 0; j < width_; ++j) {
+                    if (screen_[i][j].IsColored()) {
+                        const auto& color = screen_[i][j].GetColor();
+                        std::array<double, 3> new_color;
+                        for (auto i = 0; i < 3; ++i) {
+                            new_color[i] = color[i] * (color[i] / std::pow(max_intensity, 2) + 1) /
+                                           (1 + color[i]);
+                            new_color[i] = std::pow(new_color[i], 1.0 / 2.2);
+                        }
+                        screen_[i][j].SetColor(new_color);
                     }
                 }
             }
