@@ -21,7 +21,7 @@ public:
     }
 
     explicit Image(const std::filesystem::path& path) {
-        ReadPng(path.string());
+        ReadPng(path);
     }
 
     Image(Image&& other) : width_{other.width_}, height_{other.height_}, bytes_{other.bytes_} {
@@ -187,5 +187,5 @@ private:
     }
 
     int width_, height_;
-    png_bytep* bytes_;
+    png_bytepp bytes_;
 };
