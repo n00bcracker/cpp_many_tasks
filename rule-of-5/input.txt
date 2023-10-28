@@ -4,3 +4,4 @@ push
 2
 dup
 pop_carry
+print
