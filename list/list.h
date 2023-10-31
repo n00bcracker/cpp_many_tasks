@@ -22,7 +22,8 @@ public:
         Iterator() : head_(nullptr), it_(nullptr) {
         }
 
-        Iterator(std::shared_ptr<ListNode> head, std::shared_ptr<ListNode> iter) :  head_(head), it_(iter) {
+        Iterator(std::shared_ptr<ListNode> head, std::shared_ptr<ListNode> iter)
+            : head_(head), it_(iter) {
         }
 
         const std::shared_ptr<ListNode>& GetNode() const {
