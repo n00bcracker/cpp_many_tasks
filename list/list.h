@@ -1,10 +1,8 @@
 #pragma once
 
-#include <__type_traits/is_swappable.h>
 #include <cstddef>
 #include <iterator>
 #include <memory>
-#include <algorithm>
 #include <utility>
 
 template <class T>
