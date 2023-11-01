@@ -34,9 +34,14 @@ public:
 
     size_t Read(char* buf, size_t len) override {
         size_t res = 0;
-        while (it_ != readers_.end() && (res += (*it_)->Read(buf + res, len - res)) < len) {
-            ++it_;
-        }
+        while (it_ != readers_.end()) {
+            res = (*it_)->Read(buf, len);
+            if (!res) {
+                ++it_;
+            } else {
+                break;
+            }
+        };
 
         return res;
     }
