@@ -54,6 +54,8 @@ public:
 
     size_t Read(char* buf, size_t len) override {
         auto read_len = std::min<size_t>(len, data_.end() - it_);
+        // Reader может вернуть менее @len байт
+        read_len = std::min<size_t>(read_len, 100);
         it_ = std::ranges::copy_n(it_, read_len, buf).in;
         return read_len;
     }
