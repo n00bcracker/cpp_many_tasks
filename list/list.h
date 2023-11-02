@@ -9,6 +9,7 @@ template <class T>
 class List {
 public:
     struct ListNode;
+    struct BaseListNode;
     class Iterator {
     public:
         using iterator_category = std::bidirectional_iterator_tag;
@@ -17,15 +18,9 @@ public:
         using pointer = T*;
         using reference = T&;
 
-        Iterator() : head_(nullptr), it_(nullptr) {
-        }
+        Iterator() = default;
 
-        Iterator(std::shared_ptr<ListNode> head, std::shared_ptr<ListNode> iter)
-            : head_(head), it_(iter) {
-        }
-
-        const std::shared_ptr<ListNode>& GetNode() const {
-            return it_;
+        Iterator(BaseListNode* iter) : it_(iter) {
         }
 
         Iterator& operator++() {
@@ -36,35 +31,30 @@ public:
         Iterator operator++(int) {
             auto tmp = it_;
             it_ = it_->next;
-            return Iterator(head_, tmp);
+            return Iterator(tmp);
         }
 
         Iterator& operator--() {
-            if (it_) {
-                it_ = it_->prev;
-            } else {
-                it_ = head_->prev;
-            }
-
+            it_ = it_->prev;
             return *this;
         }
 
         Iterator operator--(int) {
             auto tmp = it_;
-            if (it_) {
-                it_ = it_->prev;
-            } else {
-                it_ = head_->prev;
-            }
-            return Iterator(head_, tmp);
+            it_ = it_->prev;
+            return Iterator(tmp);
+        }
+
+        BaseListNode* GetNode() {
+            return it_;
         }
 
         T& operator*() const {
-            return it_->value;
+            return static_cast<ListNode*>(it_)->value;
         }
 
         T* operator->() const {
-            return &(it_->value);
+            return &(static_cast<ListNode*>(it_)->value);
         }
 
         bool operator==(const Iterator& other) const {
@@ -76,36 +66,47 @@ public:
         }
 
     private:
-        std::shared_ptr<ListNode> head_;
-        std::shared_ptr<ListNode> it_;
+        BaseListNode* it_ = nullptr;
     };
 
-    struct ListNode {
+    struct BaseListNode {
+        BaseListNode* prev;
+        BaseListNode* next;
+
+        BaseListNode() : prev(nullptr), next(nullptr) {
+        }
+    };
+
+    struct ListNode : BaseListNode {
         T value;
-        std::shared_ptr<ListNode> prev;
-        std::shared_ptr<ListNode> next;
 
-        ListNode(const T& t) : value(t), prev(nullptr), next(nullptr) {
+        ListNode(const T& t) : value(t) {
         }
 
-        ListNode(T&& t) : value(std::move(t)), prev(nullptr), next(nullptr) {
+        ListNode(T&& t) : value(std::move(t)) {
         }
     };
 
-    List() = default;
-    List(const List& other) {
+    List() {
+        head_ = new BaseListNode();
+        head_->prev = head_;
+    }
+
+    List(const List& other) : List() {
         for (auto it = other.Begin(); it != other.End(); ++it) {
             PushBack(*it);
         }
     }
 
     List(List&& other) : head_(other.head_), size_(other.size_) {
-        other.head_ = nullptr;
+        other.head_ = new BaseListNode();
+        other.head_->prev = other.head_;
         other.size_ = 0;
     }
 
     ~List() {
         Clear();
+        delete head_;
     }
 
     List& operator=(List other) {
@@ -115,7 +116,7 @@ public:
     }
 
     bool IsEmpty() const {
-        return head_ == nullptr;
+        return size_ == 0;
     }
 
     size_t Size() const {
@@ -123,81 +124,67 @@ public:
     }
 
     void PushBack(const T& t) {
-        auto node = std::shared_ptr<ListNode>(new ListNode(t));
-        if (head_) {
-            LinkAfter(node, head_->prev);
+        if (!IsEmpty()) {
+            auto node = new ListNode(t);
+            LinkAfter(node, head_->prev->prev);
+            ++size_;
         } else {
-            head_ = node;
-            head_->prev = head_;
+            PushFront(t);
         }
-
-        ++size_;
     }
 
     void PushBack(T&& t) {
-        auto node = std::shared_ptr<ListNode>(new ListNode(std::move(t)));
-        if (head_) {
-            LinkAfter(node, head_->prev);
+        if (!IsEmpty()) {
+            auto node = new ListNode(std::move(t));
+            LinkAfter(node, head_->prev->prev);
+            ++size_;
         } else {
-            head_ = node;
-            head_->prev = head_;
+            PushFront(std::move(t));
         }
-
-        ++size_;
     }
 
     void PushFront(const T& t) {
-        auto node = std::shared_ptr<ListNode>(new ListNode(t));
+        auto node = new ListNode(t);
         node->next = head_;
-        if (head_) {
-            node->prev = head_->prev;
-            head_->prev = node;
-        } else {
-            node->prev = node;
-        }
-
+        node->prev = head_->prev;
+        head_->prev = node;
         head_ = node;
         ++size_;
     }
 
     void PushFront(T&& t) {
-        auto node = std::shared_ptr<ListNode>(new ListNode(std::move(t)));
+        auto node = new ListNode(std::move(t));
         node->next = head_;
-        if (head_) {
-            node->prev = head_->prev;
-            head_->prev = node;
-        } else {
-            node->prev = node;
-        }
-
+        node->prev = head_->prev;
+        head_->prev = node;
         head_ = node;
         ++size_;
     }
 
     T& Front() {
-        return head_->value;
+        return static_cast<ListNode*>(head_)->value;
     }
 
     const T& Front() const {
-        return head_->value;
+        return static_cast<ListNode*>(head_)->value;
     }
 
     T& Back() {
-        return head_->prev->value;
+        return static_cast<ListNode*>(head_->prev->prev)->value;
     }
 
     const T& Back() const {
-        return head_->prev->value;
+        return static_cast<ListNode*>(head_->prev->prev)->value;
     }
 
     void PopBack() {
-        auto& node = head_->prev;
+        auto node = head_->prev->prev;
         Unlink(node);
         --size_;
     }
 
     void PopFront() {
-        auto& node = head_;
+        auto node = head_;
         Unlink(node);
         --size_;
     }
@@ -208,53 +195,39 @@ public:
     }
 
     Iterator Begin() const {
-        return Iterator(head_, head_);
+        return Iterator(head_);
     }
 
     Iterator End() const {
-        return Iterator(head_, nullptr);
+        return Iterator(head_->prev);
     }
 
 private:
     void Clear() {
-        auto node = head_;
-        head_ = nullptr;
-        while (node) {
-            node->prev = nullptr;
-            node = node->next;
+        for (auto it = Begin(); it != End();) {
+            Erase(it++);
         }
-
-        size_ = 0;
     }
 
-    void LinkAfter(std::shared_ptr<ListNode> target, std::shared_ptr<ListNode> after) {
+    void LinkAfter(BaseListNode* target, BaseListNode* after) {
         target->prev = after;
         target->next = after->next;
         after->next = target;
-        if (target->next) {
-            target->next->prev = target;
-        } else {
-            head_->prev = target;
-        }
+        target->next->prev = target;
     }
 
-    void Unlink(std::shared_ptr<ListNode> node) {
+    void Unlink(BaseListNode* node) {
         if (node == head_) {
             head_ = node->next;
-            if (head_) {
-                head_->prev = node->prev;
-            }
         } else {
             node->prev->next = node->next;
-            if (node->next) {
-                node->next->prev = node->prev;
-            } else {
-                head_->prev = node->prev;
-            }
         }
+
+        node->next->prev = node->prev;
+        delete static_cast<ListNode*>(node);
     }
 
-    std::shared_ptr<ListNode> head_ = nullptr;
+    BaseListNode* head_ = nullptr;
     size_t size_ = 0;
 };
 
