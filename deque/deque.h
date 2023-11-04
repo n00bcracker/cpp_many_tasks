@@ -5,6 +5,7 @@
 #include <cstring>
 #include <new>
 #include <stdlib.h>
+#include <algorithm>
 
 constexpr size_t kBlockSize = 128;
 
