@@ -37,14 +37,18 @@ void TransformIf(It begin, It end, P p, F f) {
                 }
 
                 try {
-                    changed_elems.emplace(it, std::move(elem));
+                    if (elem) {
+                        changed_elems.emplace(it, std::move(elem));
+                    }
                 } catch (...) {
                 }
             }
         } catch (...) {
             if (except_type == 2) {
                 try {
-                    *it = *elem;
+                    if (elem) {
+                        *it = *elem;
+                    }
                 } catch (...) {
                 }
             }
