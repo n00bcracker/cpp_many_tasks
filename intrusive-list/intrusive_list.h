@@ -1,6 +1,5 @@
 #pragma once
 
-#include <__type_traits/is_swappable.h>
 #include <algorithm>
 #include <cstddef>
 #include <utility>
