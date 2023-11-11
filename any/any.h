@@ -4,7 +4,6 @@
 #include <concepts>
 #include <typeinfo>
 #include <utility>
-#include <memory>
 #include <type_traits>
 
 template <class T>
@@ -23,21 +22,23 @@ public:
 
     Any(const Any& other) {
         if (!other.Empty()) {
-            value_ptr_ = std::unique_ptr<AnyValueBase>(other.value_ptr_->Clone());
+            value_ptr_ = other.value_ptr_->Clone();
         }
     }
 
     Any(Any&& other) {
-        value_ptr_ = std::move(other.value_ptr_);
+        value_ptr_ = other.value_ptr_;
         other.value_ptr_ = nullptr;
     }
 
     Any& operator=(const Any& other) {
         if (this != &other) {
             if (!other.Empty()) {
-                value_ptr_.reset(other.value_ptr_->Clone());
+                AnyValueBase* tmp = other.value_ptr_->Clone();
+                delete value_ptr_;
+                value_ptr_ = tmp;
             } else {
-                value_ptr_.release();
+                delete value_ptr_;
                 value_ptr_ = nullptr;
             }
         }
@@ -46,20 +47,25 @@ public:
 
     Any& operator=(Any&& other) {
         if (this != &other) {
-            value_ptr_ = std::move(other.value_ptr_);
+            value_ptr_ = other.value_ptr_;
             other.value_ptr_ = nullptr;
         }
         return *this;
     }
 
-    ~Any() = default;
+    ~Any() {
+        delete value_ptr_;
+    }
 
     bool Empty() const {
         return value_ptr_ == nullptr;
     }
 
     void Clear() {
-        value_ptr_ = nullptr;
+        if (value_ptr_) {
+            delete value_ptr_;
+            value_ptr_ = nullptr;
+        }
     }
 
     void Swap(Any& other) {
@@ -99,5 +105,5 @@ private:
         T value_;
     };
 
-    std::unique_ptr<AnyValueBase> value_ptr_ = nullptr;
+    AnyValueBase* value_ptr_ = nullptr;
 };
