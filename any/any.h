@@ -47,6 +47,7 @@ public:
 
     Any& operator=(Any&& other) {
         if (this != &other) {
+            delete value_ptr_;
             value_ptr_ = other.value_ptr_;
             other.value_ptr_ = nullptr;
         }
