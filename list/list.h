@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <iterator>
 
-template <typename T>
+template <class T>
 class List {
 public:
     class Iterator {
@@ -57,8 +57,8 @@ public:
     Iterator End();
 };
 
-template <typename T>
+template <class T>
 List<T>::Iterator begin(List<T>&);
 
-template <typename T>
+template <class T>
 List<T>::Iterator end(List<T>&);

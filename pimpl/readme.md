@@ -1,4 +1,4 @@
-# `pimpl`
+# pimpl
 
 Вам предстоит познакомиться с
 идиомой [pimpl](http://en.cppreference.com/w/cpp/language/pimpl).

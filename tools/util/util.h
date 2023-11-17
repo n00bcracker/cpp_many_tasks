@@ -31,13 +31,17 @@ public:
         return result;
     }
 
-    std::string GenString(size_t count, char from = 'a', char to = 'z') {
+    std::string GenString(size_t count, char from, char to) {
         std::uniform_int_distribution<int> dist{from, to};
         std::string result(count, from);
         for (auto& x : result) {
             x = dist(gen_);
         }
         return result;
+    }
+
+    std::string GenString(size_t count) {
+        return GenString(count, 'a', 'z');
     }
 
     std::vector<double> GenRealVector(size_t count, double from, double to) {
@@ -65,6 +69,15 @@ public:
     template <class T>
     T GenInt() {
         return GenInt(std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
+    }
+
+    char GenChar(char from, char to) {
+        std::uniform_int_distribution<int> dist{from, to};
+        return dist(gen_);
+    }
+
+    char GenChar() {
+        return GenChar('a', 'z');
     }
 
     template <class Iterator>

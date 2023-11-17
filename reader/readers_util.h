@@ -17,7 +17,7 @@ public:
 
 class TeeReader : public Reader {
 public:
-    TeeReader(std::vector<std::unique_ptr<Reader>> readers) {
+    explicit TeeReader(std::vector<std::unique_ptr<Reader>> readers) {
     }
 
     size_t Read(char* buf, size_t len) override {
@@ -27,7 +27,7 @@ public:
 
 class HexDecodingReader : public Reader {
 public:
-    HexDecodingReader(std::unique_ptr<Reader> reader) {
+    explicit HexDecodingReader(std::unique_ptr<Reader> reader) {
     }
 
     size_t Read(char* buf, size_t len) override {
