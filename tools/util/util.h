@@ -104,7 +104,7 @@ class Timer {
     using Clock = std::chrono::steady_clock;
     struct Times {
         Clock::duration wall_time;
-        std::chrono::microseconds cpu_time; 
+        std::chrono::microseconds cpu_time;
     };
 
 public:
@@ -129,7 +129,7 @@ private:
     }
 
     const std::chrono::time_point<Clock> wall_start_ = Clock::now();
-    const std::chrono::microseconds cpu_start_ = GetCPUTime(); 
+    const std::chrono::microseconds cpu_start_ = GetCPUTime();
 };
 
 #ifdef __linux__
@@ -175,7 +175,7 @@ private:
             throw std::runtime_error{"Failed to get number of pages"};
         }
         return pages * kPageSize;
-    } 
+    }
 
     static inline const auto kPageSize = ::getpagesize();
     static inline auto is_active = false;
