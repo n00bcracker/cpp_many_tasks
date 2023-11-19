@@ -8,8 +8,8 @@
 class Spline::SplineImpl {
 public:
     SplineImpl(std::vector<double>&& x, std::vector<double>&& y, double a, double b)
-        : x_(x), y_(y), y2_(x_.size()) {
-        int res = mySplineSnd(x_.data(), y_.data(), x.size(), a, b, y2_.data());
+        : x_(std::move(x)), y_(std::move(y)), y2_(x_.size()) {
+        int res = mySplineSnd(x_.data(), y_.data(), x_.size(), a, b, y2_.data());
         if (res == -1) {
             throw std::bad_alloc();
         } else if (res == -2) {
