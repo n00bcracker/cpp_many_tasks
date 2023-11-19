@@ -34,7 +34,7 @@ private:
 };
 
 Spline::Spline(std::vector<double> x, std::vector<double> y, double a, double b)
-    : impl_(std::make_unique<SplineImpl>(SplineImpl(std::move(x), std::move(y), a, b))) {
+    : impl_(new SplineImpl(std::move(x), std::move(y), a, b)) {
 }
 
 Spline::~Spline() {
