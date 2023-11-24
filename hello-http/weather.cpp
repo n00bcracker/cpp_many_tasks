@@ -35,6 +35,7 @@ public:
         }
 
         auto request = HTTPRequest(HTTPRequest::HTTP_GET, request_uri.getPathAndQuery(),
+
                                        Poco::Net::HTTPMessage::HTTP_1_1);
         request.add("X-Yandex-API-Key", api_key_);
         session.sendRequest(request);
