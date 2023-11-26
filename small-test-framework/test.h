@@ -79,8 +79,9 @@ public:
     template <class TestClass>
     void RegisterClass(const std::string& class_name) {
         for (const auto& test_creator : registry_) {
+            const auto& test_creator_ref = *test_creator;
             if (test_creator->GetName() == class_name ||
-                typeid(*test_creator) == typeid(ConcreteTestCreator<TestClass>)) {
+                typeid(test_creator_ref) == typeid(ConcreteTestCreator<TestClass>)) {
                 throw AlreadyExist("This test type or test name already exists");
             }
         }
