@@ -1,5 +1,7 @@
 #pragma once
 
+#include "dist.h"
+
 #include <random>
 #include <vector>
 #include <algorithm>
@@ -23,7 +25,7 @@ public:
 
     template <class T>
     std::vector<T> GenIntegralVector(size_t count, T from, T to) {
-        std::uniform_int_distribution dist{from, to};
+        UniformIntDistribution dist{from, to};
         std::vector<T> result(count);
         for (auto& cur : result) {
             cur = dist(gen_);
@@ -32,7 +34,7 @@ public:
     }
 
     std::string GenString(size_t count, char from, char to) {
-        std::uniform_int_distribution<int> dist{from, to};
+        UniformIntDistribution<int> dist{from, to};
         std::string result(count, from);
         for (auto& x : result) {
             x = dist(gen_);
@@ -62,7 +64,7 @@ public:
 
     template <class T>
     T GenInt(T from, T to) {
-        std::uniform_int_distribution dist{from, to};
+        UniformIntDistribution dist{from, to};
         return dist(gen_);
     }
 
@@ -72,7 +74,7 @@ public:
     }
 
     char GenChar(char from, char to) {
-        std::uniform_int_distribution<int> dist{from, to};
+        UniformIntDistribution<int> dist{from, to};
         return dist(gen_);
     }
 
