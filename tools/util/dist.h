@@ -47,6 +47,9 @@ private:
 
     template <class Gen>
     IntType operator()(Gen& gen, IntType a, IntType b);
+
+    template <class>
+    static constexpr auto kDependentFalse = false;
 };
 
 template <class IntType>
@@ -61,13 +64,13 @@ IntType UniformIntDistribution<IntType>::operator()(Gen& urng, IntType a, IntTyp
     constexpr UCType kUrngRange = kUrngMax - kUrngMin;
 
     const UCType urange = static_cast<UCType>(b) - static_cast<UCType>(a);
-    UCType ret;
+    UCType ret{};
     if (kUrngRange > urange) {
         const UCType uerange = urange + 1;
 #if __SIZEOF_INT128__
         if constexpr (kUrngRange == std::numeric_limits<uint64_t>::max()) {
             uint64_t u64erange = uerange;
-            ret = SNd<unsigned __int128>(urng, u64erange);
+            ret = __extension__ SNd<unsigned __int128>(urng, u64erange);
         } else
 #else
     #error "__int128 is not defined"
@@ -84,12 +87,16 @@ IntType UniformIntDistribution<IntType>::operator()(Gen& urng, IntType a, IntTyp
             ret /= scaling;
         }
     } else if (kUrngRange < urange) {
-        UCType tmp;
-        do {
-            const UCType uerngrange = kUrngRange + 1;
-            tmp = (uerngrange * operator()(urng, 0, urange / uerngrange));
-            ret = tmp + (static_cast<UCType>(urng()) - kUrngMin);
-        } while (ret > urange || ret < tmp);
+        if constexpr (kUrngRange < std::numeric_limits<UCType>::max()) {
+            UCType tmp;
+            do {
+                const UCType uerngrange = kUrngRange + 1;
+                tmp = (uerngrange * operator()(urng, 0, urange / uerngrange));
+                ret = tmp + (static_cast<UCType>(urng()) - kUrngMin);
+            } while (ret > urange || ret < tmp);
+        } else {
+            static_assert(kDependentFalse<Gen>, "Unexpected");
+        }
     } else {
         ret = static_cast<UCType>(urng()) - kUrngMin;
     }
