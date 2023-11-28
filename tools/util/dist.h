@@ -87,16 +87,15 @@ IntType UniformIntDistribution<IntType>::operator()(Gen& urng, IntType a, IntTyp
             ret /= scaling;
         }
     } else if (kUrngRange < urange) {
-        if constexpr (kUrngRange < std::numeric_limits<UCType>::max()) {
-            UCType tmp;
-            do {
-                const UCType uerngrange = kUrngRange + 1;
-                tmp = (uerngrange * operator()(urng, 0, urange / uerngrange));
-                ret = tmp + (static_cast<UCType>(urng()) - kUrngMin);
-            } while (ret > urange || ret < tmp);
-        } else {
-            static_assert(kDependentFalse<Gen>, "Unexpected");
+        const UCType uerngrange = kUrngRange + 1;
+        if (uerngrange == 0) {
+            __builtin_unreachable();
         }
+        UCType tmp;
+        do {
+            tmp = (uerngrange * operator()(urng, 0, urange / uerngrange));
+            ret = tmp + (static_cast<UCType>(urng()) - kUrngMin);
+        } while (ret > urange || ret < tmp);
     } else {
         ret = static_cast<UCType>(urng()) - kUrngMin;
     }
