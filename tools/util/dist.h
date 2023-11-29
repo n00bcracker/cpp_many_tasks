@@ -3,6 +3,7 @@
 #include <type_traits>
 #include <limits>
 #include <cstdint>
+#include <cmath>
 
 template <typename IntType = int>
 class UniformIntDistribution {
@@ -73,7 +74,7 @@ IntType UniformIntDistribution<IntType>::operator()(Gen& urng, IntType a, IntTyp
             ret = __extension__ SNd<unsigned __int128>(urng, u64erange);
         } else
 #else
-    #error "__int128 is not defined"
+#error "__int128 is not defined"
 #endif
             if constexpr (kUrngRange == std::numeric_limits<uint32_t>::max()) {
             uint32_t u32erange = uerange;
@@ -102,3 +103,43 @@ IntType UniformIntDistribution<IntType>::operator()(Gen& urng, IntType a, IntTyp
 
     return ret + a;
 }
+
+template <class RealType = double>
+class UniformRealDistribution {
+public:
+    static_assert(std::is_floating_point_v<RealType>, "result_type must be a floating point type");
+
+    UniformRealDistribution() : UniformRealDistribution(0.) {
+    }
+
+    explicit UniformRealDistribution(RealType a, RealType b = RealType{1}) : a_{a}, b_{b} {
+    }
+
+    RealType operator()(auto& urng) {
+        return GenerateCanonical(urng) * (b_ - a_) + a_;
+    }
+
+private:
+    template <class Gen>
+    static RealType GenerateCanonical(Gen& urng) {
+        constexpr auto kBits = std::numeric_limits<RealType>::digits;
+        constexpr auto kR =
+            static_cast<long double>(Gen::max()) - static_cast<long double>(Gen::min()) + 1.L;
+        const size_t log2r = std::log(kR) / std::log(2.L);
+        const size_t m = std::max<size_t>(1UL, (kBits + log2r - 1UL) / log2r);
+        RealType sum{0};
+        RealType tmp{1};
+        for (auto k = m; k != 0; --k) {
+            sum += static_cast<RealType>(urng() - urng.min()) * tmp;
+            tmp *= kR;
+        }
+        if (RealType ret = sum / tmp; ret >= RealType{1}) {
+            return std::nextafter(RealType{1}, RealType{0});
+        } else {
+            return ret;
+        }
+    }
+
+    RealType a_;
+    RealType b_;
+};

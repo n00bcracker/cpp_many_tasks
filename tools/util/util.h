@@ -11,6 +11,7 @@
 #include <system_error>
 #include <chrono>
 #include <fstream>
+#include <array>
 
 #ifdef __linux__
 #include <sys/time.h>
@@ -46,11 +47,12 @@ public:
         return GenString(count, 'a', 'z');
     }
 
-    std::vector<double> GenRealVector(size_t count, double from, double to) {
-        std::uniform_real_distribution dist{from, to};
-        std::vector<double> result(count);
-        for (auto& cur : result) {
-            cur = dist(gen_);
+    template <size_t N>
+    std::array<double, N> GenRealArray(double from, double to) {
+        UniformRealDistribution dist{from, to};
+        std::array<double, N> result;
+        for (auto& x : result) {
+            x = dist(gen_);
         }
         return result;
     }

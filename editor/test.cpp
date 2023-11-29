@@ -190,6 +190,17 @@ TEST_CASE_METHOD(EditorTest, "Undo/Redo ShiftLeft") {
     RequireText("acb", 2);
 }
 
+TEST_CASE_METHOD(EditorTest, "Undo-Redo-Undo-Redo") {
+    Type("ab");
+    editor.Undo();
+    editor.Redo();
+    RequireText("ab", 2);
+    editor.Undo();
+    RequireText("a", 1);
+    editor.Redo();
+    RequireText("ab", 2);
+}
+
 TEST_CASE_METHOD(EditorTest, "Undo/Redo ShiftRight") {
     editor.Type('a');
     editor.ShiftLeft();
