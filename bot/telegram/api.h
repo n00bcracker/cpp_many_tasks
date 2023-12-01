@@ -4,7 +4,7 @@
 #include <vector>
 #include <cstdint>
 #include <optional>
-#include <exception>
+#include <stdexcept>
 
 class TelegramAPI {
 public:

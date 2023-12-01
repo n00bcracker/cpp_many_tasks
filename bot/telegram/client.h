@@ -57,5 +57,5 @@ private:
     uint64_t cur_update_id_;
     const TelegramAPI api_;
     const std::string name_;
-    static constexpr std::string_view kOffsetFilePath = "./offset.tmp";
+    static constexpr const char* kOffsetFilePath = "./offset.tmp";
 };
