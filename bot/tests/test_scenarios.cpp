@@ -1,10 +1,8 @@
 #include <tests/test_scenarios.h>
-
 #include <catch2/catch_test_macros.hpp>
 #include <telegram/api.h>
 #include <string>
 #include <optional>
-
 
 void TestSingleGetMe(std::string_view url) {
     auto api = TelegramAPI(std::string(url), "123");
