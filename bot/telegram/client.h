@@ -12,7 +12,7 @@ struct Message {
     Message(uint64_t timestamp, int64_t chat, std::string message_text);
     virtual std::unique_ptr<Message> Reply(std::string reply,
                                            bool mention_prev_message = false) const;
-
+    virtual ~Message() = default;
     const uint64_t timestamp_s;
     const int64_t chat_id;
     const std::string text;

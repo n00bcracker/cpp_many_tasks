@@ -2,7 +2,7 @@
 #include "bot.h"
 #include <memory>
 
-int main(int argc, char* argv[]) {
+int main(int, char**) {
     std::unique_ptr<MessengerClient> messenger_ptr(new TelegramClient(
         "https://api.telegram.org", "6739870667:AAEV7axYX_6uKef6Nz9gcwKIIkKNclJdyCg"));
     TelegramBot bot(42);
