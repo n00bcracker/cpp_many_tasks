@@ -64,7 +64,7 @@ int main() {
     auto spent = std::chrono::duration<double>{wall_time};
     std::cout << "Spent " << spent.count() << " seconds\n";
 
-    if (wall_time > std::chrono::seconds{1}) {
+    if (wall_time > std::chrono::milliseconds{400}) {
         if (cpu_time < .98 * wall_time) {
             std::cout << "Sorry, but CI is laggy 😥\n";
             std::cout << "Try later...\n";

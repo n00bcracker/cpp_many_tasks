@@ -1,5 +1,5 @@
 function(link_poco NAME)
-  target_link_libraries(${NAME} PRIVATE PocoNet PocoFoundation PocoJSON)
+  target_link_libraries(${NAME} PRIVATE PocoNet PocoNetSSL PocoFoundation PocoJSON PocoUtil)
 endfunction()
 
 add_catch(test_hello_http test.cpp fake/fake_data.cpp SOLUTION_SRCS weather.cpp)
