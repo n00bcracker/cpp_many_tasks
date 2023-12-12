@@ -21,7 +21,8 @@ public:
             }
         }
 
-        Node(Node&& other) : children_(std::move(other.children_)), value_(std::move(other.value_)) {
+        Node(Node&& other)
+            : children_(std::move(other.children_)), value_(std::move(other.value_)) {
         }
 
         const Node& operator=(Node other) {
@@ -38,7 +39,7 @@ public:
             return *value_;
         }
 
-        const std::shared_ptr<Node>& operator[](size_t index) const{
+        const std::shared_ptr<Node>& operator[](size_t index) const {
             return children_[index];
         }
 
@@ -128,7 +129,7 @@ private:
         Node* cur_node = &root_;
         do {
             auto local_index = Index(index);
-            if(!(*cur_node)[local_index]) {
+            if (!(*cur_node)[local_index]) {
                 (*cur_node)[local_index] = std::shared_ptr<Node>(new Node());
             }
 
@@ -144,7 +145,8 @@ private:
         do {
             auto local_index = Index(index);
             if ((*cur_node)[local_index]) {
-                (*cur_node)[local_index] = std::shared_ptr<Node>(new Node(*(*cur_node)[local_index]));
+                (*cur_node)[local_index] =
+                    std::shared_ptr<Node>(new Node(*(*cur_node)[local_index]));
             } else {
                 (*cur_node)[local_index] = std::shared_ptr<Node>(new Node());
             }
