@@ -40,7 +40,7 @@ private:
     }
 
     size_t FullPartHash(const std::string& data) {
-        static size_t seed = static_cast<size_t>(3339675911UL);
+        static size_t seed = static_cast<size_t>(0xc70f6907UL);
         size_t hash = seed ^ (15 * kMul);
         const size_t m_data = ShiftMix(EncodeFullPartData(data) * kMul) * kMul;
         hash ^= m_data;
@@ -72,7 +72,6 @@ private:
             const size_t hash = FullPartHash(cur_name);
             if (const auto right_part = TryDecodeData(hash)) {
                 std::string name = cur_name + *right_part;
-                // std::cout << name << ' ' << hash_func(name) << std::endl;
                 collisions_.emplace_back(std::move(name));
             }
             return;
