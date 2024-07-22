@@ -105,15 +105,17 @@ private:
         (static_cast<size_t>(0xc6a4a793UL) << 32UL) + static_cast<size_t>(0x5bd1e995UL);
 };
 
-// (hash1 ^ data1) * mul = p * c + k
-// (hash1 ^ data1) = 0
-
 int main() {
     const auto current_dir = GetFileDir(__FILE__);
     std::filesystem::path input_file(current_dir / "../input.txt");
     std::ofstream myfile(input_file);
+    Timer timer;
     GenNames generator;
     generator.Generate();
+    auto [wall_time, cpu_time] = timer.GetTimes();
+    auto spent = std::chrono::duration<double>{wall_time};
+    std::cout << "Spent " << spent.count() << " seconds\n";
+
     std::vector<std::string> result = generator.GetCollisions();
     for (const auto& name : result) {
         myfile << name << std::endl;
